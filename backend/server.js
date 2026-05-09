@@ -5,7 +5,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
+app.get("/", (req, res) => {
+  res.send("HospiFinder AI Backend Running");
+});
 app.post("/analyze", (req, res) => {
  const { symptoms = [] } = req.body;
 
