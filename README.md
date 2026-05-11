@@ -58,7 +58,7 @@ The project focuses on improving accessibility and reducing confusion during hea
 
 
 ## ⚙️ System Workflow
-
+```text
 User Input
    ↓
 Frontend Interface (React)
