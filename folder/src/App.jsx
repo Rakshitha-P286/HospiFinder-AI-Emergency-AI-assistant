@@ -5,6 +5,9 @@ const analyzeEmergency = async () => {
     alert("Please select at least one symptom");
     return;
   }
+  const API_URL = "https://hospifinder-api.onrender.com";
+
+export default API_URL;
 
   setLoading(true);
 
