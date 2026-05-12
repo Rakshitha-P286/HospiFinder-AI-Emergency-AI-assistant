@@ -2,7 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "*"
+}));
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -23,38 +26,25 @@ app.post("/analyze", (req, res) => {
   let severity = "Low";
   let specialist = "general";
 
-  // ❤️ HEART
   if (
     lowerSymptoms.includes("chest pain") ||
     lowerSymptoms.includes("shortness of breath")
   ) {
     severity = "High";
     specialist = "cardiology";
-  }
-
-  // 🧠 NEURO
-  else if (
+  } else if (
     lowerSymptoms.includes("unconscious") ||
     lowerSymptoms.includes("seizure")
   ) {
     severity = "High";
     specialist = "neurology";
-  }
-
-  // 🩸 BLEEDING
-  else if (lowerSymptoms.includes("bleeding")) {
+  } else if (lowerSymptoms.includes("bleeding")) {
     severity = "Medium";
     specialist = "general";
-  }
-
-  // 🦴 FRACTURE
-  else if (lowerSymptoms.includes("fracture")) {
+  } else if (lowerSymptoms.includes("fracture")) {
     severity = "Medium";
     specialist = "orthopedics";
-  }
-
-  // 🔥 BURNS
-  else if (lowerSymptoms.includes("burns")) {
+  } else if (lowerSymptoms.includes("burns")) {
     severity = "Medium";
     specialist = "burns";
   }
@@ -90,7 +80,7 @@ app.post("/analyze", (req, res) => {
     .filter(h => specialist === "general" ? true : h.specialist === specialist)
     .map(h => ({
       ...h,
-      score: (h.ICU ? 50 : 0) + (10 - h.distance)
+      score: (h.ICU ? 50 : 0) + Math.max(0, 10 - h.distance)
     }))
     .sort((a, b) => b.score - a.score);
 
@@ -124,10 +114,13 @@ app.post("/analyze", (req, res) => {
     severity,
     specialist,
     hospitals: scoredHospitals,
-    firstAid
+    firstAid,
+    cprVideo: "https://www.youtube.com/watch?v=2eA8dY6eZ6c"
   });
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
