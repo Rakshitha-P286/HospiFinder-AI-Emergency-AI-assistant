@@ -1,126 +1,146 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
-
-app.use(cors({
-  origin: "*"
-}));
-
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("HospiFinder AI Backend Running");
 });
-
 app.post("/analyze", (req, res) => {
-  const { symptoms = [] } = req.body;
+const { symptoms = [] } = req.body;
 
-  if (symptoms.length === 0) {
-    return res.status(400).json({
-      error: "Select at least one symptom"
-    });
-  }
+if (symptoms.length === 0) {
+return res.status(400).json({
+error: "Select at least one symptom"
+});
+}
 
-  const lowerSymptoms = symptoms.map(s => s.toLowerCase());
+let severity = "Low";
+let specialist = "general";
 
-  let severity = "Low";
-  let specialist = "general";
+const lowerSymptoms = symptoms.map(s => s.toLowerCase());
 
-  if (
-    lowerSymptoms.includes("chest pain") ||
-    lowerSymptoms.includes("shortness of breath")
-  ) {
-    severity = "High";
-    specialist = "cardiology";
-  } else if (
-    lowerSymptoms.includes("unconscious") ||
-    lowerSymptoms.includes("seizure")
-  ) {
-    severity = "High";
-    specialist = "neurology";
-  } else if (lowerSymptoms.includes("bleeding")) {
-    severity = "Medium";
-    specialist = "general";
-  } else if (lowerSymptoms.includes("fracture")) {
-    severity = "Medium";
-    specialist = "orthopedics";
-  } else if (lowerSymptoms.includes("burns")) {
-    severity = "Medium";
-    specialist = "burns";
-  }
+// ❤️ HEART
+if (
+lowerSymptoms.includes("chest pain") &&
+(lowerSymptoms.includes("dizziness") ||
+lowerSymptoms.includes("vomiting") ||
+lowerSymptoms.includes("low energy"))
+) {
+severity = "High";
+specialist = "cardiology";
+}
 
-  const hospitals = [
-    {
-      name: "Narayana Hrudayalaya",
-      ICU: true,
-      specialist: "cardiology",
-      distance: 6,
-      lat: 12.8095069,
-      lng: 77.6953293
-    },
-    {
-      name: "NIMHANS",
-      ICU: true,
-      specialist: "neurology",
-      distance: 12,
-      lat: 12.9396085,
-      lng: 77.5930259
-    },
-    {
-      name: "Oxford Medical College",
-      ICU: true,
-      specialist: "general",
-      distance: 5,
-      lat: 12.7882637,
-      lng: 77.7574664
-    }
-  ];
+// 🧠 NEURO
+else if (
+lowerSymptoms.includes("unconscious") ||
+lowerSymptoms.includes("seizure")
+) {
+severity = "High";
+specialist = "neurology";
+}
 
-  const scoredHospitals = hospitals
-    .filter(h => specialist === "general" ? true : h.specialist === specialist)
-    .map(h => ({
-      ...h,
-      score: (h.ICU ? 50 : 0) + Math.max(0, 10 - h.distance)
-    }))
-    .sort((a, b) => b.score - a.score);
+// 🩸 BLEEDING
+else if (lowerSymptoms.includes("bleeding")) {
+severity = "Medium";
+specialist = "general";
+}
 
-  let firstAid = [];
+// 🦴 FRACTURE
+else if (lowerSymptoms.includes("fracture")) {
+severity = "Medium";
+specialist = "orthopedics";
+}
 
-  if (severity === "High") {
-    firstAid = [
-      "Call emergency services immediately",
-      "Keep patient stable",
-      "Do not move unnecessarily",
-      "Monitor breathing",
-      "Stay with patient"
-    ];
-  } else if (severity === "Medium") {
-    firstAid = [
-      "Apply basic first aid",
-      "Keep patient calm",
-      "Visit hospital soon",
-      "Avoid panic",
-      "Monitor condition"
-    ];
-  } else {
-    firstAid = [
-      "Rest and hydrate",
-      "Monitor symptoms",
-      "Consult doctor if needed"
-    ];
-  }
+// 🏥 HOSPITALS
+const hospitals = [
+{
+name: "Narayana Hrudayalaya",
+ICU: true,
+specialist: "cardiology",
+distance: 6,
+lat: 12.8095069,
+lng: 77.6953293
+},
+{
+name: "Oxford Medical College",
+ICU: true,
+specialist: "general",
+distance: 5,
+lat: 12.7882637,
+lng: 77.7574664
+},
+{
+name: "NIMHANS",
+ICU: true,
+specialist: "neurology",
+distance: 12,
+lat: 12.9396085,
+lng: 77.5930259
+}
+];
 
-  res.json({
-    severity,
-    specialist,
-    hospitals: scoredHospitals,
-    firstAid,
-    cprVideo: "https://www.youtube.com/watch?v=2eA8dY6eZ6c"
-  });
+let scoredHospitals = hospitals.map(h => ({
+...h,
+score: (h.ICU ? 50 : 0) + (10 - h.distance)
+})).sort((a, b) => b.score - a.score);
+
+// 🩹 FIRST AID + CPR + VIDEO
+let firstAid = [];
+let cprVideo = null;
+
+if (severity === "High" && specialist === "cardiology") {
+firstAid = [
+"Make patient sit and stay calm",
+"Call emergency immediately",
+"Check breathing",
+"Start CPR if needed"
+];
+
+cprVideo = "https://youtu.be/Plse2FOkV4Q?si=K5kSAhZW8DJZZ8En"; // CPR demo
+}
+
+else if (lowerSymptoms.includes("unconscious")) {
+firstAid = [
+"Check breathing",
+"Call emergency services",
+"Start CPR if no breathing",
+"30 compressions + 2 breaths"
+];
+
+cprVideo = "https://youtu.be/Plse2FOkV4Q?si=K5kSAhZW8DJZZ8En";
+}
+
+else if (lowerSymptoms.includes("bleeding")) {
+firstAid = [
+"Apply pressure on wound",
+"Use clean cloth",
+"Drink water"
+];
+}
+else if (lowerSymptoms.includes("fracture")) {
+firstAid = [
+"Stay calm + drink water",
+"Don't move the fractured part",
+"Immobolise"
+];
+}
+
+else {
+firstAid = [
+"Stay calm",
+"Monitor symptoms",
+"Seek medical help"
+];
+}
+
+res.json({
+severity,
+specialist,
+hospitals: scoredHospitals,
+firstAid,
+cprVideo
+});
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(5000, () => {
+console.log("Server running on port 5000")
 });
