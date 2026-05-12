@@ -9,6 +9,7 @@ function App() {
   const [result, setResult] = useState(false);
   const [ambulanceBooked, setAmbulanceBooked] = useState(false);
   const [language, setLanguage] = useState("en");
+  const [analysisData, setAnalysisData] = useState(null);
 
   const symptoms = [
     "Chest Pain",
@@ -81,21 +82,162 @@ const startVoiceInput = () => {
     setListening(false);
   };
 };
-  const analyzeEmergency = () => {
-  
- 
-    if (selectedSymptoms.length === 0) {
-      alert("Please select at least one symptom");
-      return;
+ const analyzeEmergency = () => {
+  if (selectedSymptoms.length === 0) {
+    alert("Please select at least one symptom");
+    return;
+  }
+
+  setLoading(true);
+
+  setTimeout(() => {
+
+    let severity = 40;
+    let warning = "Moderate Emergency";
+
+    // ----------------------------
+    // CRITICAL SYMPTOMS
+    // ----------------------------
+    if (
+      selectedSymptoms.includes("Loss of Consciousness") ||
+      selectedSymptoms.includes("Seizures") ||
+      selectedSymptoms.includes("Chest Pain") ||
+      selectedSymptoms.includes("Shortness of Breath")
+    ) {
+      severity = 90;
+      warning = "Critical Emergency";
     }
 
-    setLoading(true);
+    // ----------------------------
+    // HIGH RISK
+    // ----------------------------
+    else if (
+      selectedSymptoms.includes("Bleeding") ||
+      selectedSymptoms.includes("Burns") ||
+      selectedSymptoms.includes("Difficulty Swallowing")
+    ) {
+      severity = 75;
+      warning = {analysisData?.warning};
+    }
 
-    setTimeout(() => {
-      setLoading(false);
-      setResult(true);
-    }, 2500);
-  };
+    // ----------------------------
+    // MEDIUM
+    // ----------------------------
+    else if (
+      selectedSymptoms.includes("High Fever") ||
+      selectedSymptoms.includes("Severe Headache") ||
+      selectedSymptoms.includes("Abdominal Pain")
+    ) {
+      severity = 60;
+      warning = "Medium Severity";
+    }
+
+    // ----------------------------
+    // LOW
+    // ----------------------------
+    else {
+      severity = 35;
+      warning = "Low Severity";
+    }
+
+    // ----------------------------
+    // HOSPITAL MATCHING
+    // ----------------------------
+
+    let matchedHospitals = [];
+
+    if (emergencyType === "Cardiac") {
+      matchedHospitals = [
+        {
+          name: "Narayana Hrudayalaya",
+          distance: "1.2 km",
+          time: "4 min drive",
+          rating: "4.9",
+          phone: "+91 9876543210",
+          specialties: ["Cardiology", "Emergency", "ICU"],
+          map: "https://maps.google.com",
+        },
+      ];
+    }
+
+    else if (emergencyType === "Neurology") {
+      matchedHospitals = [
+        {
+          name: "NIMHANS",
+          distance: "3.1 km",
+          time: "9 min drive",
+          rating: "4.8",
+          phone: "+91 9988776655",
+          specialties: ["Neurology", "Brain Trauma", "ICU"],
+          map: "https://maps.google.com",
+        },
+      ];
+    }
+
+    else if (emergencyType === "Burns") {
+      matchedHospitals = [
+        {
+          name: "Victoria Burn Care",
+          distance: "5 km",
+          time: "14 min drive",
+          rating: "4.5",
+          phone: "+91 9011223344",
+          specialties: ["Burn Care", "Trauma", "Emergency"],
+          map: "https://maps.google.com",
+        },
+      ];
+    }
+
+    else {
+      matchedHospitals = hospitals;
+    }
+
+    // ----------------------------
+    // FIRST AID BASED ON CASE
+    // ----------------------------
+
+    let dynamicFirstAid = [];
+
+    if (selectedSymptoms.includes("Burns")) {
+      dynamicFirstAid = [
+        "Cool the burn under running water",
+        "Do not apply ice directly",
+        "Cover with clean cloth",
+        "Avoid bursting blisters",
+        "Seek emergency medical care",
+      ];
+    }
+
+    else if (selectedSymptoms.includes("Bleeding")) {
+      dynamicFirstAid = [
+        "Apply direct pressure",
+        "Use clean cloth or bandage",
+        "Elevate injured area",
+        "Do not remove soaked cloth",
+        "Call emergency services immediately",
+      ];
+    }
+
+    else {
+      dynamicFirstAid = firstAidSteps;
+    }
+
+    // ----------------------------
+    // SAVE RESULTS
+    // ----------------------------
+
+    setAnalysisData({
+      severity,
+      warning,
+      hospitals: matchedHospitals,
+      firstAid: dynamicFirstAid,
+    });
+
+    setLoading(false);
+    setResult(true);
+
+  }, 2500);
+};
 
   // multi-lingual service
 
@@ -576,7 +718,7 @@ const t = translations[language];
               <p style={{ marginTop: "10px" }}>
                 <div style={{ marginTop: "20px" }}>
   <p style={{ marginBottom: "10px" }}>
-    Severity score: 85/100
+    Severity score: {analysisData?.severity}/100
   </p>
 
   <div
@@ -590,7 +732,7 @@ const t = translations[language];
   >
     <div
       style={{
-        width: "85%",
+        width: `${analysisData?.severity}%`,
         height: "100%",
         background:
           "linear-gradient(to right,#facc15,#f97316,#dc2626)",
@@ -607,7 +749,7 @@ const t = translations[language];
               🏥 {t.hospitals}
             </h1>
 
-            {hospitals.map((hospital, index) => (
+            {analysisData?.hospitals.map((hospital, index) => (
               <div
                 key={index}
                 style={{
@@ -704,7 +846,7 @@ const t = translations[language];
                 🩹 {t.firstAid}
               </h1>
 
-              {firstAidSteps.map((step, index) => (
+              {analysisData?.firstAid.map((step, index) => (
                 <div
                   key={index}
                   style={{
@@ -831,7 +973,7 @@ const t = translations[language];
     </p>
 
     <ul style={{ paddingLeft: "18px" }}>
-      {hospitals.map((h, i) => (
+      {analysisData?.hospitals.map((h, i) => (
         <li key={i}>{h.name}</li>
       ))}
     </ul>
