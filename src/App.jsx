@@ -64,4 +64,8 @@ const analyzeEmergency = async () => {
     setLoading(false);
 
   }
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 150b854eb770af4b51317597982f67a8cd122b70
