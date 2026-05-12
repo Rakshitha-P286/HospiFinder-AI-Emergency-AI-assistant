@@ -1,11 +1,10 @@
-import API_URL from "./api";
+import API_URL from "./api.js";
 
 const analyzeEmergency = async () => {
   if (selectedSymptoms.length === 0) {
     alert("Please select at least one symptom");
     return;
   }
-
   setLoading(true);
 
   try {
