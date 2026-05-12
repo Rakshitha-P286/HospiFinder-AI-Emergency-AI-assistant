@@ -86,54 +86,114 @@ app.post("/analyze", (req, res) => {
     score: (h.ICU ? 50 : 0) + (10 - h.distance)
   })).sort((a, b) => b.score - a.score);
 
-  // 🩹 FIRST AID + CPR + VIDEO
-  let firstAid = [];
-  let cprVideo = null;
+ // 🩹 SMART FIRST AID SYSTEM
+let firstAid = [];
+let cprVideo = null;
 
-  if (severity === "High" && specialist === "cardiology") {
-    firstAid = [
-      "Make patient sit and stay calm",
-      "Call emergency immediately",
-      "Check breathing",
-      "Start CPR if needed"
-    ];
+// ❤️ HEART ATTACK
+if (
+  lowerSymptoms.includes("chest pain") &&
+  (lowerSymptoms.includes("dizziness") ||
+    lowerSymptoms.includes("vomiting") ||
+    lowerSymptoms.includes("low energy"))
+) {
 
-    cprVideo = "https://youtu.be/Plse2FOkV4Q?si=K5kSAhZW8DJZZ8En"; // CPR demo
-  }
+  firstAid = [
+    "Make patient sit calmly",
+    "Loosen tight clothes",
+    "Call ambulance immediately",
+    "Give aspirin if available",
+    "Check breathing continuously"
+  ];
 
-  else if (lowerSymptoms.includes("unconscious")) {
-    firstAid = [
-      "Check breathing",
-      "Call emergency services",
-      "Start CPR if no breathing",
-      "30 compressions + 2 breaths"
-    ];
+  cprVideo = "https://youtu.be/Plse2FOkV4Q?si=K5kSAhZW8DJZZ8En";
+}
 
-    cprVideo = "https://youtu.be/Plse2FOkV4Q?si=K5kSAhZW8DJZZ8En";
-  }
+// 🧠 UNCONSCIOUS
+else if (lowerSymptoms.includes("unconscious")) {
 
-  else if (lowerSymptoms.includes("bleeding")) {
-    firstAid = [
-      "Apply pressure on wound",
-      "Use clean cloth",
-      "Drink water"
-    ];
-  }
+  firstAid = [
+    "Check breathing immediately",
+    "Lay patient on side",
+    "Do not give food/water",
+    "Start CPR if not breathing",
+    "Call emergency services"
+  ];
+
+  cprVideo = "https://youtu.be/Plse2FOkV4Q?si=K5kSAhZW8DJZZ8En";
+}
+
+// 🩸 BLEEDING
+else if (lowerSymptoms.includes("bleeding")) {
+
+  firstAid = [
+    "Apply direct pressure on wound",
+    "Use clean cloth or bandage",
+    "Raise injured area if possible",
+    "Do not touch deep wounds",
+    "Visit nearest emergency hospital"
+  ];
+}
+
+// 🔥 BURNS
+else if (lowerSymptoms.includes("burn")) {
+
+  firstAid = [
+    "Cool burn under running water",
+    "Do not apply ice",
+    "Cover with clean cloth",
+    "Avoid touching blisters",
+    "Seek medical attention"
+  ];
+}
+
+// 🦴 FRACTURE
 else if (lowerSymptoms.includes("fracture")) {
-    firstAid = [
-      "Stay calm + drink water",
-      "Don't move the fractured part",
-      "Immobolise"
-    ];
-  }
 
-  else {
-    firstAid = [
-      "Stay calm",
-      "Monitor symptoms",
-      "Seek medical help"
-    ];
-  }
+  firstAid = [
+    "Do not move injured part",
+    "Use support to immobilize",
+    "Apply ice pack gently",
+    "Avoid pressure on fracture",
+    "Go to orthopedic hospital"
+  ];
+}
+
+// 🤒 FEVER
+else if (lowerSymptoms.includes("fever")) {
+
+  firstAid = [
+    "Drink plenty of water",
+    "Take proper rest",
+    "Monitor body temperature",
+    "Use light clothing",
+    "Consult doctor if fever increases"
+  ];
+}
+
+// 😵 DIZZINESS
+else if (lowerSymptoms.includes("dizziness")) {
+
+  firstAid = [
+    "Sit or lie down safely",
+    "Drink water slowly",
+    "Avoid sudden movements",
+    "Rest for some time",
+    "Seek medical help if persistent"
+  ];
+}
+
+// 🤕 GENERAL
+else {
+
+  firstAid = [
+    "Stay calm",
+    "Monitor symptoms carefully",
+    "Avoid self-medication",
+    "Contact nearby hospital",
+    "Follow doctor advice"
+  ];
+}
 
   res.json({
     severity,
